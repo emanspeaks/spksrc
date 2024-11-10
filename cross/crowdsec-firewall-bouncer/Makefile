@@ -43,11 +43,10 @@ SYSTEM = synology
 ENV += BUILD_VERSION=v${PKG_VERS}
 ENV += BUILD_TAG=$(SYSTEM)-$(PKG_VERS)-$(PKG_REV)
 ENV += BUILD_TIMESTAMP:=$(shell date +%F"_"%T)
-ENV += GOBUILD="go build -buildvcs=false"
 
 crowdsec-firewall-bouncer_compile:
 	@$(MSG) "Compile"
-	cd $(GO_SRC_DIR) && env $(ENV) $(MAKE) build
+	cd $(GO_SRC_DIR) && env $(ENV) $(MAKE) GOBUILD="go build -buildvcs=false" build
 
 crowdsec-firewall-bouncer_install:
 	@$(MSG) "Copying binary files"

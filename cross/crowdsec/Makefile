@@ -52,7 +52,7 @@ ENV += DEFAULT_DATADIR=${DEFAULT_DATAPATH}
 ENV += BUILD_RE2_WASM=1
 
 crowdsec_compile:
-	$(RUN) $(MAKE) build
+	$(RUN) $(MAKE) GOBUILD="go build -buildvcs=false" build
 
 crowdsec_install:
 	@$(MSG) "Copying binary files"
