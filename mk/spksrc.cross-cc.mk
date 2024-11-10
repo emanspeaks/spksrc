@@ -1,22 +1,6 @@
 # Default make programs
 #
 
-#
-# When compiling from cross/* it's not possible
-# to build in parallel using both -jX command
-# line argument in conjunction with flag
-# PARALLEL_MAKE=X.  The .NOTPARALLEL is needed
-# in order to disable the -jX flag when called
-# within cross/* only.
-#
-# This does not affect building from spk/*
-# where .NOTPARALLEL is mandatory but will still
-# obey to both -jX + PARALLEL_MAKE options.
-#
-ifneq ($(PARALLEL_MAKE),nop)
-.NOTPARALLEL:
-endif
-
 # Common makefiles
 include ../../mk/spksrc.common.mk
 include ../../mk/spksrc.directories.mk
@@ -34,8 +18,10 @@ DIST_FILE     = $(DISTRIB_DIR)/$(LOCAL_FILE)
 DIST_EXT      = $(PKG_EXT)
 
 ifneq ($(ARCH),)
+ifneq ($(ARCH),noarch)
 ARCH_SUFFIX = -$(ARCH)-$(TCVERSION)
 TC = syno$(ARCH_SUFFIX)
+endif
 endif
 
 #####
@@ -69,48 +55,10 @@ include ../../mk/spksrc.install.mk
 plist: install
 include ../../mk/spksrc.plist.mk
 
-
-### Clean rules
-smart-clean:
-	rm -rf $(WORK_DIR)/$(PKG_DIR)
-	rm -f $(WORK_DIR)/.$(COOKIE_PREFIX)*
-
-clean:
-	rm -fr work work-* build-*.log
-
 all: install plist
 
-### For make kernel-required (used by spksrc.spk.mk)
-include ../../mk/spksrc.kernel-required.mk
 
-### For make digests
-include ../../mk/spksrc.generate-digests.mk
-
-### For make dependency-tree
-include ../../mk/spksrc.dependency-tree.mk
-
-.PHONY: all-archs
-all-archs: $(addprefix arch-,$(AVAILABLE_TOOLCHAINS))
-
-####
-
-cross-cc_msg:
-ifneq ($(filter 1 on ON,$(PSTAT)),)
-	@$(MSG) MAKELEVEL: $(MAKELEVEL), PARALLEL_MAKE: $(PARALLEL_MAKE), ARCH: $(subst build-arch-,,$(MAKECMDGOALS)), NAME: $(NAME) >> $(PSTAT_LOG)
-endif
-
-arch-%:
-	@$(MSG) Building package for arch $(or $(filter $(addprefix %, $(DEFAULT_TC)), $(filter %$(word 2,$(subst -, ,$*)), $(filter $(firstword $(subst -, ,$*))%, $(AVAILABLE_TOOLCHAINS)))), $*)
-	$(MAKE) $(addprefix build-arch-, $(or $(filter $(addprefix %, $(DEFAULT_TC)), $(filter %$(word 2,$(subst -, ,$*)), $(filter $(firstword $(subst -, ,$*))%, $(AVAILABLE_TOOLCHAINS)))),$*))
-
-build-arch-%: cross-cc_msg
-	@$(MSG) Building package for arch $*
-ifneq ($(filter 1 on ON,$(PSTAT)),)
-	@$(MSG) MAKELEVEL: $(MAKELEVEL), PARALLEL_MAKE: $(PARALLEL_MAKE), ARCH: $*, NAME: $(NAME) [BEGIN] >> $(PSTAT_LOG)
-endif
-	-@MAKEFLAGS= $(PSTAT_TIME) $(MAKE) ARCH=$(firstword $(subst -, ,$*)) TCVERSION=$(lastword $(subst -, ,$*)) 2>&1 | tee build-$*.log
-ifneq ($(filter 1 on ON,$(PSTAT)),)
-	@$(MSG) MAKELEVEL: $(MAKELEVEL), PARALLEL_MAKE: $(PARALLEL_MAKE), ARCH: $*, NAME: $(NAME) [END] >> $(PSTAT_LOG)
-endif
+### For arch-* and all-<supported|latest>
+include ../../mk/spksrc.supported.mk
 
 ####

@@ -1,5 +1,5 @@
 PKG_NAME = RHash
-PKG_VERS = 1.4.2
+PKG_VERS = 1.4.4
 PKG_EXT = tar.gz
 PKG_DIST_NAME = v$(PKG_VERS).$(PKG_EXT)
 PKG_DIST_SITE = https://github.com/rhash/RHash/archive
@@ -29,6 +29,6 @@ endif
 ifeq ($(findstring $(ARCH),$(x64_ARCHS)),$(ARCH))
 CONFIGURE_ARGS = --target=x86_64-linux
 endif
-CONFIGURE_ARGS += --prefix=$(INSTALL_PREFIX) --enable-symlinks --enable-static
+CONFIGURE_ARGS += --prefix=$(INSTALL_PREFIX) --enable-symlinks --disable-static
 
 include ../../mk/spksrc.cross-cc.mk

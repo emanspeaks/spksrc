@@ -1,10 +1,9 @@
 PKG_NAME = iperf2
-PKG_VERS = 2.1.4
+PKG_VERS = 2.2.0
 PKG_EXT = tar.gz
 PKG_NAME_REAL = iperf
-PKG_DIST_NAME = $(PKG_NAME_REAL)-$(PKG_VERS).$(PKG_EXT)/download
-PKG_DIST_SITE = https://sourceforge.net/projects/$(PKG_NAME)/files
-PKG_DIST_FILE = $(PKG_NAME_REAL)-$(PKG_VERS).$(PKG_EXT)
+PKG_DIST_NAME = $(PKG_NAME_REAL)-$(PKG_VERS).$(PKG_EXT)
+PKG_DIST_SITE = https://sourceforge.net/projects/iperf2/files
 PKG_DIR = $(PKG_NAME_REAL)-$(PKG_VERS)
 
 DEPENDS =

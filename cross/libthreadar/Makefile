@@ -1,5 +1,5 @@
 PKG_NAME = libthreadar
-PKG_VERS = 1.3.5
+PKG_VERS = 1.4.0
 PKG_EXT = tar.gz
 PKG_DIST_NAME = $(PKG_NAME)-$(PKG_VERS).$(PKG_EXT)
 PKG_DIST_SITE = https://sourceforge.net/projects/libthreadar/files/$(PKG_VERS)
@@ -19,5 +19,7 @@ LICENSE  = LGPLv3
 GNU_CONFIGURE = 1
 # avoid build of subdir "doc"
 CONFIGURE_ARGS = ac_subdirs_all="src"
+
+ADDITIONAL_CPPFLAGS = -O
 
 include ../../mk/spksrc.cross-cc.mk

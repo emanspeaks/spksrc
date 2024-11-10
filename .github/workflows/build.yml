@@ -6,25 +6,75 @@ on:
       package:
         description: 'Package to build'
         required: true
-        default: 'syno-magnet'
+        default: 'adminer'
       publish:
         description: 'Publish to repository'
         required: false
         default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      add_noarch_builds:
+        description: 'Include noarch packages'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      add_dsm72_builds:
+        description: 'Include DSM 7.2 archs'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      add_dsm71_builds:
+        description: 'Include DSM 7.1 archs'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      add_dsm62_builds:
+        description: 'Include DSM 6.2 archs'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      add_dsm52_builds:
+        description: 'Include DSM 5.2 archs'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      add_srm12_builds:
+        description: 'Include SRM 1.2 archs'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
   pull_request:
     paths:
-    - 'spk/**'
-    - 'cross/**'
-    - 'native/**'
+      - 'spk/**'
+      - 'cross/**'
+      - 'native/**'
   push:
-    tags:
-      - "*-*"
     branches:
       - "**"
     paths:
-    - 'spk/**'
-    - 'cross/**'
-    - 'native/**'
+      - 'spk/**'
+      - 'cross/**'
+      - 'native/**'
 
 jobs:
   prepare:
@@ -32,31 +82,34 @@ jobs:
     runs-on: ubuntu-latest
     # provide results to other jobs
     outputs:
-        arch_packages: ${{ steps.dependencies.outputs.arch_packages }}
-        noarch_packages: ${{ steps.dependencies.outputs.noarch_packages }}
-        download_packages: ${{ steps.dependencies.outputs.download_packages }}
+      arch_packages: ${{ steps.dependencies.outputs.arch_packages }}
+      noarch_packages: ${{ steps.dependencies.outputs.noarch_packages }}
+      add_noarch_builds: ${{ steps.set-defaults.outputs.add_noarch_builds }}
+      add_dsm72_builds: ${{ steps.set-defaults.outputs.add_dsm72_builds }}
+      add_dsm71_builds: ${{ steps.set-defaults.outputs.add_dsm71_builds }}
+      add_dsm62_builds: ${{ steps.set-defaults.outputs.add_dsm62_builds }}
+      add_dsm52_builds: ${{ steps.set-defaults.outputs.add_dsm52_builds }}
+      add_srm12_builds: ${{ steps.set-defaults.outputs.add_srm12_builds }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-            submodules: recursive
-            token: ${{ secrets.GITHUB_TOKEN }}
-            fetch-depth: 0
-            persist-credentials: false
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Get changed files for pull request
         if: github.event_name == 'pull_request'
         id: getfile_pr
         run: |
           git diff --no-commit-id --name-only -r origin/master...${{github.event.pull_request.head.sha}} | xargs
-          echo "::set-output name=files::$(git diff --no-commit-id --name-only -r origin/master...${{github.event.pull_request.head.sha}} | xargs)"
+          echo "files=$(git diff --no-commit-id --name-only -r origin/master...${{github.event.pull_request.head.sha}} | xargs)" >> $GITHUB_OUTPUT
 
       - name: Get changed files for push
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') == false
+        if: github.event_name == 'push'
         id: getfile
         run: |
           git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs
-          echo "::set-output name=files::$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs)"
+          echo "files=$(git diff-tree --no-commit-id --name-only -r ${{ github.sha }} | xargs)" >> $GITHUB_OUTPUT
 
       - name: Evaluate dependencies
         id: dependencies
@@ -65,21 +118,19 @@ jobs:
           GH_FILES: ${{ steps.getfile.outputs.files }} ${{ steps.getfile_pr.outputs.files }}
           SPK_TO_BUILD: ${{ github.event.inputs.package }}
 
-  download:
-    name: Download sources
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-          persist-credentials: false
+      # Set default values for all builds (manual or automated)
+      - name: Set default values for generate matrix
+        id: set-defaults
+        run: |
+          echo "add_noarch_builds=${{ github.event.inputs.add_noarch_builds || steps.dependencies.outputs.has_noarch_packages }}" >> $GITHUB_OUTPUT
+          echo "add_dsm72_builds=${{ github.event.inputs.add_dsm72_builds || steps.dependencies.outputs.has_min_dsm72_packages }}" >> $GITHUB_OUTPUT
+          echo "add_dsm71_builds=${{ github.event.inputs.add_dsm71_builds || steps.dependencies.outputs.has_arch_packages }}" >> $GITHUB_OUTPUT
+          echo "add_dsm62_builds=${{ github.event.inputs.add_dsm62_builds || steps.dependencies.outputs.has_arch_packages }}" >> $GITHUB_OUTPUT
+          echo "add_dsm52_builds=${{ github.event.inputs.add_dsm52_builds || 'false' }}" >> $GITHUB_OUTPUT
+          echo "add_srm12_builds=${{ github.event.inputs.add_srm12_builds || 'false' }}" >> $GITHUB_OUTPUT
 
       - name: Cache downloaded files
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: distrib
           # use run_id in key to cache within workflow only.
@@ -88,43 +139,96 @@ jobs:
       - name: Download source files
         run: ./.github/actions/download.sh
         env:
-          DOWNLOAD_PACKAGES: ${{ needs.prepare.outputs.download_packages }}
+          DOWNLOAD_PACKAGES: ${{ steps.dependencies.outputs.download_packages }}
+          ARCH_PACKAGES: ${{ needs.prepare.outputs.arch_packages }}
+          NOARCH_PACKAGES: ${{ needs.prepare.outputs.noarch_packages }}
+
+  generate_matrix:
+    name: Generate Matrix
+    needs: prepare
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          # Use the default values passed from the prepare step
+          add_noarch_builds=${{ needs.prepare.outputs.add_noarch_builds }}
+          add_dsm72_builds=${{ needs.prepare.outputs.add_dsm72_builds }}
+          add_dsm71_builds=${{ needs.prepare.outputs.add_dsm71_builds }}
+          add_dsm62_builds=${{ needs.prepare.outputs.add_dsm62_builds }}
+          add_dsm52_builds=${{ needs.prepare.outputs.add_dsm52_builds }}
+          add_srm12_builds=${{ needs.prepare.outputs.add_srm12_builds }}
+
+          # Create matrix as a JSON object
+          matrix='{"include": ['
+
+          if [ "$add_noarch_builds" == "true" ]; then
+            matrix+='{"arch": "noarch-1.1"},'
+            matrix+='{"arch": "noarch-3.1"},'
+            matrix+='{"arch": "noarch-6.1"},'
+            matrix+='{"arch": "noarch-7.0"},'
+          fi
+          if [ "$add_dsm72_builds" == "true" ]; then
+            matrix+='{"arch": "x64-7.2"},'
+            matrix+='{"arch": "aarch64-7.2"},'
+          fi
+          if [ "$add_dsm71_builds" == "true" ]; then
+            matrix+='{"arch": "x64-7.1"},'
+            matrix+='{"arch": "aarch64-7.1"},'
+            matrix+='{"arch": "evansport-7.1"},'
+            matrix+='{"arch": "armv7-7.1"},'
+            matrix+='{"arch": "comcerto2k-7.1"},'
+          fi
+          if [ "$add_dsm62_builds" == "true" ]; then
+            matrix+='{"arch": "x64-6.2.4"},'
+            matrix+='{"arch": "aarch64-6.2.4"},'
+            matrix+='{"arch": "evansport-6.2.4"},'
+            matrix+='{"arch": "armv7-6.2.4"},'
+            matrix+='{"arch": "hi3535-6.2.4"},'
+            matrix+='{"arch": "88f6281-6.2.4"},'
+            matrix+='{"arch": "qoriq-6.2.4"},'
+          fi
+          if [ "$add_dsm52_builds" == "true" ]; then
+            matrix+='{"arch": "x86-5.2"},'
+            matrix+='{"arch": "88f6281-5.2"},'
+            matrix+='{"arch": "ppc853x-5.2"},'
+          fi
+          if [ "$add_srm12_builds" == "true" ]; then
+            matrix+='{"arch": "armv7-1.2"},'
+          fi
+
+          # Remove trailing comma and close the matrix
+          matrix=$(echo $matrix | sed 's/,$//')
+          matrix+=']}'
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   build:
     name: Build
-    needs: [ download, prepare ]
+    needs: [prepare, generate_matrix]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        # x64=x86_64, evansport=i686, aarch64=armv8, armv7, hi3535=armv7l, 88f6281=armv5, qoriq=ppc
-        # https://github.com/SynoCommunity/spksrc/wiki/Synology-and-SynoCommunity-Package-Architectures
-        # arch: [noarch, noarch-6.2, noarch-7.0, x64-6.2, x64-7.0, evansport-6.2, evansport-7.0, aarch64-6.2, aarch64-7.0, armv7-6.2, armv7-7.0, hi3535-6.2, 88f6281-6.2, qoriq-6.2, comcerto2k-7.0]
-##        arch: [armada37xx-6.2.3, armada37xx-7.0, cedarview-6.2.3, cedarview-7.0, x64-6.2.3, x64-7.0]
-        arch: [88f6281-6.2.3, alpine-6.2.3, apollolake-6.2.3, armada370-6.2.3, armada375-6.2.3, armada37xx-6.2.3, armada38x-6.2.3, armadaxp-6.2.3, avoton-6.2.3, braswell-6.2.3, broadwell-6.2.3, broadwellnk-6.2.3, bromolow-6.2.3, cedarview-6.2.3, comcerto2k-6.2.3, denverton-6.2.3, dockerx64-6.2.3, evansport-6.2.3, geminilake-6.2.3, grantley-6.2.3, hi3535-6.2.3, kvmx64-6.2.3, monaco-6.2.3, purley-6.2.3, rtd1296-6.2.3, v1000-6.2.3, x64-6.2.3, x86-6.2.3, alpine-7.0, apollolake-7.0, armada370-7.0, armada375-7.0, armada37xx-7.0, armada38x-7.0, armadaxp-7.0, avoton-7.0, braswell-7.0, broadwellnk-7.0, bromolow-7.0, cedarview-7.0, comcerto2k-7.0, denverton-7.0, evansport-7.0, geminilake-7.0, grantley-7.0, kvmx64-7.0, monaco-7.0, purley-7.0, rtd1296-7.0, v1000-7.0]
+      matrix: ${{ fromJSON(needs.generate_matrix.outputs.matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-            submodules: recursive
-            token: ${{ secrets.GITHUB_TOKEN }}
-            fetch-depth: 0
-            persist-credentials: false
+        uses: actions/checkout@v4
 
       - name: Cache toolchains
-        uses: actions/cache@v2
+        uses: actions/cache@v4
+        # Do not cache qoriq toolchain. It must be built every time to install custom rust toolchain
+        if: ${{ contains(matrix.arch,'qoriq') == false }}
         with:
           path: toolchain/*/work
-          key: toolchain-${{ matrix.arch }}-v3-${{ hashFiles('toolchain/*/digests') }}
+          key: toolchain-${{ matrix.arch }}-v3-${{ hashFiles(format('toolchain/syno-{0}/digests',matrix.arch)) }}
 
       - name: Use cache of downloaded files
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: distrib
           key: distrib-${{ github.run_id }}
 
-      - name: Build Package (file changes)
-        if: startsWith(github.ref, 'refs/tags/') == false
+      - name: Build Package (based on changed files)
         # We don't want to stop the build on errors.
         # Errors are reported in "Build Status"
         continue-on-error: true
@@ -136,25 +240,9 @@ jobs:
           NOARCH_PACKAGES: ${{ needs.prepare.outputs.noarch_packages }}
           PUBLISH: ${{ github.event.inputs.publish }}
           API_KEY: ${{ secrets.PUBLISH_API_KEY }}
+          PACKAGE_TO_PUBLISH: ${{ github.event.inputs.package }}
           # https://github.com/SynoCommunity/spksrc/wiki/Compile-and-build-rules
           GH_ARCH: ${{ matrix.arch }}
-          BUILD_ERROR_FILE: /github/workspace/build_errors.txt
-          BUILD_ERROR_LOGFILE: /github/workspace/build_log_errors.txt
-          BUILD_UNSUPPORTED_FILE: /github/workspace/build_unsupported.txt
-          BUILD_SUCCESS_FILE: /github/workspace/build_success.txt
-
-      - name: Build Package (Tag)
-        if: startsWith(github.ref, 'refs/tags/')
-        # We don't want to stop the build on errors.
-        # Errors are reported in "Build Status"
-        continue-on-error: true
-        uses: docker://ghcr.io/synocommunity/spksrc:latest
-        with:
-          entrypoint: ./.github/actions/build-tag.sh
-        env:
-          # https://github.com/SynoCommunity/spksrc/wiki/Compile-and-build-rules
-          GH_ARCH: ${{ matrix.arch }}
-          API_KEY: ${{ secrets.PUBLISH_API_KEY }}
           BUILD_ERROR_FILE: /github/workspace/build_errors.txt
           BUILD_ERROR_LOGFILE: /github/workspace/build_log_errors.txt
           BUILD_UNSUPPORTED_FILE: /github/workspace/build_unsupported.txt
@@ -174,25 +262,9 @@ jobs:
           BUILD_SUCCESS_FILE: /github/workspace/build_success.txt
 
       - name: Upload artifacts
-        if: success()
-        uses: actions/upload-artifact@v2
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: packages
+          name: Packages for ${{ matrix.arch }}
           path: packages/*.spk
-
-  release:
-    needs: build
-    name: Release
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v2
-
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: 'packages/*.spk'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          if-no-files-found: ignore
