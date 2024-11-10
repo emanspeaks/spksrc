@@ -8,7 +8,7 @@
 
 SRCNAME = cs-firewall-bouncer
 PKG_NAME = crowdsec-firewall-bouncer
-PKG_VERS = 0.0.22
+PKG_VERS = 0.0.31
 PKG_REV = 1
 PKG_EXT = tar.gz
 PKG_DIST_NAME = $(PKG_NAME)-$(PKG_VERS).$(PKG_EXT)
@@ -55,4 +55,3 @@ crowdsec-firewall-bouncer_install:
 	@$(MSG) "Copying config files"
 	install -m 775 -d $(STAGING_INSTALL_PREFIX)/etc/crowdsec/bouncers
 	install -m 664 $(GO_SRC_DIR)/config/crowdsec-firewall-bouncer.yaml $(STAGING_INSTALL_PREFIX)/etc/crowdsec/bouncers/crowdsec-firewall-bouncer.yaml
-

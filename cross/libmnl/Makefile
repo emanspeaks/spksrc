@@ -7,7 +7,7 @@
 #
 
 PKG_NAME = libmnl
-PKG_VERS = 1.0.4
+PKG_VERS = 1.0.5
 PKG_EXT = tar.bz2
 PKG_DIST_NAME = $(PKG_NAME)-$(PKG_VERS).$(PKG_EXT)
 PKG_DIST_SITE = https://www.netfilter.org/projects/libmnl/files
@@ -22,4 +22,3 @@ LICENSE  = LGPLv2.1+
 GNU_CONFIGURE = 1
 
 include ../../mk/spksrc.cross-cc.mk
-

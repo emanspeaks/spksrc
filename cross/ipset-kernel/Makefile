@@ -8,7 +8,7 @@
 
 SRCNAME = ipset
 PKG_NAME = ipset-kernel
-PKG_VERS = 7.15
+PKG_VERS = 7.22
 PKG_REV = 2
 PKG_EXT = tar.bz2
 PKG_DIST_NAME = $(SRCNAME)-$(PKG_VERS)
@@ -17,7 +17,7 @@ PKG_DIST_FILE = $(SRCNAME)-$(PKG_VERS).$(PKG_EXT)
 PKG_DIR =  $(SRCNAME)-$(PKG_VERS)
 #EXTRACT_PATH = $(WORK_DIR)/$(PKG_NAME)-$(PKG_VERS)
 
-DEPENDS = cross/libmnl 
+DEPENDS = cross/libmnl
 
 MAINTAINER = "CyberMind"
 MAINTAINER_URL = "https://cybermind.fr"
@@ -107,4 +107,3 @@ ipset-kernel_install:
 ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_netportnet.ko $(KO_DIR)/ipset
 # list types
 ## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_list_set.ko $(KO_DIR)/ipset
-

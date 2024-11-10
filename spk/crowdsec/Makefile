@@ -7,8 +7,8 @@
 #
 
 SPK_NAME = crowdsec
-SPK_VERS = 1.3.0
-SPK_REV = 5
+SPK_VERS = 1.6.3
+SPK_REV = 6
 SPK_ICON = src/$(SPK_NAME).png
 
 DISPLAY_NAME = CrowdSec

@@ -8,7 +8,7 @@
 
 SRCNAME = ipset
 PKG_NAME = $(SRCNAME)
-PKG_VERS = 7.15
+PKG_VERS = 7.22
 PKG_REV = 1
 PKG_EXT = tar.bz2
 PKG_DIST_NAME = $(SRCNAME)-$(PKG_VERS).$(PKG_EXT)
@@ -35,5 +35,3 @@ CONFIGURE_ARGS += --enable-settype-modules=no
 CONFIGURE_ARGS += --with-gnu-ld=yes
 
 include ../../mk/spksrc.cross-cc.mk
-
-

@@ -7,7 +7,7 @@
 #
 
 PKG_NAME = crowdsec
-PKG_VERS = 1.3.0
+PKG_VERS = 1.6.3
 PKG_REV = 1
 PKG_EXT = tar.gz
 PKG_DIST_NAME = $(PKG_NAME)-$(PKG_VERS).$(PKG_EXT)
