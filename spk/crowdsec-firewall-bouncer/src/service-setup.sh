@@ -73,20 +73,21 @@ GenConfigApiKey ()
 {
 	## Gen&ConfigApiKey
 	if grep -q "{API_KEY}" "${CSFB_CUSTOMCONFIG}"; then
-		API_KEY=$("${CSCLI}" -c "${CFG_FILE}" bouncers add "${CSFNAME}" -o raw)
+		API_KEY=$("${CSCLI}" bouncers add "${CSFNAME}" -o raw)
 		if [ -n "${API_KEY}" ]; then
 			sed -i "s,^\(\s*api_key\s*:\s*\).*\$,\1${API_KEY}," "${CSFB_CUSTOMCONFIG}"
 		else
 			echo "ERROR: NO API key registered…"
 		fi
 	else
-		FW_BOUNCER=$("${CSCLI}" -c "${CFG_FILE}" bouncers list | grep "${CSFNAME}")
+		# FW_BOUNCER=$("${CSCLI}" -c "${CFG_FILE}" bouncers list | grep "${CSFNAME}")
+		FW_BOUNCER=$("${CSCLI}" bouncers list | grep "${CSFNAME}")
 		if [ -n "${FW_BOUNCER}" ]; then
 			echo "INFO: API key already registered…"
 		else
 			API_KEY=$(sed -rn "s,^api_key\s*:\s*([^\n]+)$,\1,p" "${CSFB_CUSTOMCONFIG}")
 			if [ -n "${API_KEY}" ]; then
-				NEW_API_KEY=$("${CSCLI}" -c "${CFG_FILE}" bouncers add "${CSFNAME}" -k "${API_KEY}" -o raw)
+				NEW_API_KEY=$("${CSCLI}" bouncers add "${CSFNAME}" -k "${API_KEY}" -o raw)
 				if [ -n "${NEW_API_KEY}" ]; then
 					if [ "${NEW_API_KEY}" = "${API_KEY}" ]; then
 						echo "INFO: API key already registered but bouncer re-registered with success…"
@@ -148,7 +149,7 @@ init_config() {
 		echo "Modify initial config file: ${CSFB_CUSTOMCONFIG}"
 		sed -i "s,^\(\s*pid_dir\s*:\s*\).*\$,\1${CROWDSEC_TMPDIR}/run," "${CSFB_CUSTOMCONFIG}"
 		sed -i "s,^\(\s*log_dir\s*:\s*\).*\$,\1${CROWDSEC_TMPDIR}/log," "${CSFB_CUSTOMCONFIG}"
-		sed -i "s,^\(\s*api_url\s*:\s*\).*\$,\1http://${LAPI_URL}:${LAPI_PORT}/," "${CSFB_CUSTOMCONFIG}"
+		#sed -i "s,^\(\s*api_url\s*:\s*\).*\$,\1http://${LAPI_URL}:${LAPI_PORT}/," "${CSFB_CUSTOMCONFIG}"
 
 		## Gen&ConfigApiKey
 		GenConfigApiKey
@@ -219,9 +220,9 @@ load_ipset ()
 	# unload_ipset
 	echo "INFO: loading ipset kernel modules"  # from ${MODULES_DIR}"
 	/sbin/insmod /lib/modules/nfnetlink.ko
-	/sbin/insmod /lib/modules/net/netfilter/ipset/ip_set.ko
-	/sbin/insmod /lib/modules/net/netfilter/ipset/ip_set_hash_net.ko
-	/sbin/insmod /lib/modules/net/netfilter/xt_set.ko
+	/sbin/insmod /lib/modules/ipset/ip_set.ko
+	/sbin/insmod /lib/modules/ipset/ip_set_hash_net.ko
+	/sbin/insmod /lib/modules/xt_set.ko
 	# /sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/ipset/ip_set.ko"
 	# /sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/ipset/ip_set_hash_net.ko"
 	# /sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/xt_set.ko"
@@ -255,4 +256,5 @@ service_prestart ()
 service_posttstop ()
 {
 	# unload_ipset
+	echo
 }
