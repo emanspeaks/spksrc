@@ -217,11 +217,14 @@ service_postupgrade ()
 load_ipset ()
 {
 	# unload_ipset
-	echo "INFO: loading ipset kernel modules from ${MODULES_DIR}"
+	echo "INFO: loading ipset kernel modules"  # from ${MODULES_DIR}"
 	/sbin/insmod /lib/modules/nfnetlink.ko
-	/sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/ipset/ip_set.ko"
-	/sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/ipset/ip_set_hash_net.ko"
-	/sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/xt_set.ko"
+	/sbin/insmod /lib/modules/net/netfilter/ipset/ip_set.ko
+	/sbin/insmod /lib/modules/net/netfilter/ipset/ip_set_hash_net.ko
+	/sbin/insmod /lib/modules/net/netfilter/xt_set.ko
+	# /sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/ipset/ip_set.ko"
+	# /sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/ipset/ip_set_hash_net.ko"
+	# /sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/xt_set.ko"
 	if [[ $(/sbin/lsmod | grep ip_set_hash_net) ]]; then
 		echo "INFO: ipset kernel modules loaded…"
 	else
