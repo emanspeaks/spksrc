@@ -6,14 +6,12 @@
 # Copyright (C) 2021-2022 CrowdSec <crowdsec@crowdsec.net>
 #
 
-SRCNAME = ipset
-PKG_NAME = $(SRCNAME)
+PKG_NAME = ipset
 PKG_VERS = 7.22
-PKG_REV = 1
 PKG_EXT = tar.bz2
-PKG_DIST_NAME = $(SRCNAME)-$(PKG_VERS).$(PKG_EXT)
+PKG_DIST_NAME = $(PKG_NAME)-$(PKG_VERS).$(PKG_EXT)
 PKG_DIST_SITE = https://ipset.netfilter.org
-PKG_DIR =  $(SRCNAME)-$(PKG_VERS)
+PKG_DIR =  $(PKG_NAME)-$(PKG_VERS)
 
 DEPENDS = cross/libmnl
 
@@ -25,13 +23,26 @@ LICENSE  = MIT
 
 GNU_CONFIGURE = 1
 
-REQUIRE_KERNEL = 1
-
 ##CONFIGURE_ARGS += --host=$(TC_TARGET)
 CONFIGURE_ARGS += --with-kbuild=$(KERNEL_ROOT)
-CONFIGURE_ARGS += --with-ksource=$(KERNEL_ROOT)
+# CONFIGURE_ARGS += --with-ksource=$(KERNEL_ROOT)
 ##CONFIGURE_ARGS += --includedir=$(KERNEL_ROOT)/arch/$(ARCH)/include
-CONFIGURE_ARGS += --enable-settype-modules=no
+# CONFIGURE_ARGS += --enable-settype-modules=no
 CONFIGURE_ARGS += --with-gnu-ld=yes
 
+ENV += CONFIG_IP_SET_MAX=256
+
+REQUIRE_KERNEL = 1
+REQUIRE_KERNEL_MODULE  = CONFIG_NETFILTER_XT_SET:net/netfilter:xt_set
+REQUIRE_KERNEL_MODULE += CONFIG_IP_SET:net/netfilter/ipset:ip_set
+REQUIRE_KERNEL_MODULE += CONFIG_IP_SET_HASH_NET:net/netfilter/ipset:ip_set_hash_net
+
+MOD_DIR = /lib/modules
+STRIP_TARGET      = nop
+POST_STRIP_TARGET = nop
+
+# CFLAGS += -I"$(LINUX_DIR)/include"
+
 include ../../mk/spksrc.cross-cc.mk
+
+PLIST_TRANSFORM = sed -e 's%@TC_KERNEL@%$(TC_KERNEL)%'
