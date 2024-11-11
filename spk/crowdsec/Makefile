@@ -10,6 +10,7 @@ SPK_NAME = crowdsec
 SPK_VERS = 1.6.3
 SPK_REV = 6
 SPK_ICON = src/$(SPK_NAME).png
+REQUIRED_MIN_DSM = 7.1
 
 DISPLAY_NAME = CrowdSec
 DESCRIPTION = CrowdSec - the open-source and participative IPS able to analyze visitor behavior & provide an adapted response to all kinds of attacks. It also leverages the crowd power to generate a global CTI database to protect the user network.

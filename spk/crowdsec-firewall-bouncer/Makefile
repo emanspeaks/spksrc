@@ -10,6 +10,7 @@ SPK_NAME = crowdsec-firewall-bouncer
 SPK_VERS = 0.0.31
 SPK_REV = 6
 SPK_ICON = src/$(SPK_NAME).png
+REQUIRED_MIN_DSM = 7.1
 
 DISPLAY_NAME = CrowdSec-Firewall-Bouncer
 DESCRIPTION = Crowdsec-Firewall-Bouncer will fetch new and old decisions from a CrowdSec API to add them in a blocklist used by supported firewalls.
