@@ -57,16 +57,16 @@ REQUIRE_KERNEL_MODULE += CONFIG_IP_SET_HASH_NET:net/netfilter/ipset:ip_set_hash_
 STRIP_TARGET      = nop
 POST_STRIP_TARGET = nop
 
-KO_DIR = $(INSTALL_DIR)$(INSTALL_PREFIX)/lib/modules/$(TC_KERNEL)/net/netfilter
-SRC_DIR = $(WORK_DIR)/$(SRCNAME)-$(PKG_VERS)
-LINUX_DIR = $(KERNEL_ROOT)
+# KO_DIR = $(INSTALL_DIR)$(INSTALL_PREFIX)/lib/modules/$(TC_KERNEL)/net/netfilter
+# SRC_DIR = $(WORK_DIR)/$(SRCNAME)-$(PKG_VERS)
+# LINUX_DIR = $(KERNEL_ROOT)
 
 MOD_DIR = /lib/modules
 
 GNU_CONFIGURE = 1
 CONFIGURE_ARGS = --with-kbuild=$(KERNEL_ROOT)
 
-CFLAGS += -I"$(LINUX_DIR)/include"
+# CFLAGS += -I"$(LINUX_DIR)/include"
 
 #TARGET_LDFLAGS += -Wl,--gc-sections,--as-needed
 
@@ -74,34 +74,34 @@ include ../../mk/spksrc.cross-cc.mk
 
 PLIST_TRANSFORM = sed -e 's%@TC_KERNEL@%$(TC_KERNEL)%'
 
-.PHONY: ipset-kernel_compile
-ipset-kernel_compile:
-	$(RUN) ARCH=$(TC_ARCH) CROSS_COMPILE=$(TC_PATH)$(TC_PREFIX) $(MAKE) -C $(SRC_DIR) --include-dir=$(KERNEL_ROOT) modules
-###	cd $(SRC_DIR) && env $(ENV) ARCH=$(TC_ARCH) CROSS_COMPILE=$(TC_PATH)$(TC_PREFIX) KSRC=$(LINUX_DIR) $(MAKE) -C $(SRC_DIR) KERNEL_DIR=$(LINUX_DIR) build modules
+# .PHONY: ipset-kernel_compile
+# ipset-kernel_compile:
+# 	$(RUN) ARCH=$(TC_ARCH) CROSS_COMPILE=$(TC_PATH)$(TC_PREFIX) $(MAKE) -C $(SRC_DIR) --include-dir=$(KERNEL_ROOT) modules
+# ###	cd $(SRC_DIR) && env $(ENV) ARCH=$(TC_ARCH) CROSS_COMPILE=$(TC_PATH)$(TC_PREFIX) KSRC=$(LINUX_DIR) $(MAKE) -C $(SRC_DIR) KERNEL_DIR=$(LINUX_DIR) build modules
 
-.PHONY: ipset-kernel_install
-ipset-kernel_install:
-	$(RUN) mkdir -p $(KO_DIR)
-# xtset core
-	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/xt_set.ko $(KO_DIR)
-	$(RUN) mkdir -p $(KO_DIR)/ipset
-# ipset core
-	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set.ko $(KO_DIR)/ipset
-# bitmap types
-## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_bitmap_ip.ko $(KO_DIR)/ipset
-## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_bitmap_ipmac.ko $(KO_DIR)/ipset
-## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_bitmap_port.ko $(KO_DIR)/ipset
-# hash types
-## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ip.ko $(KO_DIR)/ipset
-## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ipmark.ko $(KO_DIR)/ipset
-## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ipport.ko $(KO_DIR)/ipset
-## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ipportip.ko $(KO_DIR)/ipset
-## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ipportnet.ko $(KO_DIR)/ipset
-## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_mac.ko $(KO_DIR)/ipset
-	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_net.ko $(KO_DIR)/ipset
-## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_netport.ko $(KO_DIR)/ipset
-## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_netiface.ko $(KO_DIR)/ipset
-## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_netnet.ko $(KO_DIR)/ipset
-## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_netportnet.ko $(KO_DIR)/ipset
-# list types
-## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_list_set.ko $(KO_DIR)/ipset
+# .PHONY: ipset-kernel_install
+# ipset-kernel_install:
+# 	$(RUN) mkdir -p $(KO_DIR)
+# # xtset core
+# 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/xt_set.ko $(KO_DIR)
+# 	$(RUN) mkdir -p $(KO_DIR)/ipset
+# # ipset core
+# 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set.ko $(KO_DIR)/ipset
+# # bitmap types
+# ## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_bitmap_ip.ko $(KO_DIR)/ipset
+# ## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_bitmap_ipmac.ko $(KO_DIR)/ipset
+# ## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_bitmap_port.ko $(KO_DIR)/ipset
+# # hash types
+# ## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ip.ko $(KO_DIR)/ipset
+# ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ipmark.ko $(KO_DIR)/ipset
+# ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ipport.ko $(KO_DIR)/ipset
+# ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ipportip.ko $(KO_DIR)/ipset
+# ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_ipportnet.ko $(KO_DIR)/ipset
+# ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_mac.ko $(KO_DIR)/ipset
+# 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_net.ko $(KO_DIR)/ipset
+# ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_netport.ko $(KO_DIR)/ipset
+# ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_netiface.ko $(KO_DIR)/ipset
+# ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_netnet.ko $(KO_DIR)/ipset
+# ## FIXME :	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_hash_netportnet.ko $(KO_DIR)/ipset
+# # list types
+# ## FIXME : 	install -p -m 644 $(WORK_DIR)/linux/net/netfilter/ipset/ip_set_list_set.ko $(KO_DIR)/ipset
