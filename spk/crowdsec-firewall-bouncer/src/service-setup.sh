@@ -216,7 +216,7 @@ service_postupgrade ()
 
 load_ipset ()
 {
-	unload_ipset
+	# unload_ipset
 	echo "INFO: loading ipset kernel modules from ${MODULES_DIR}"
 	/sbin/insmod /lib/modules/nfnetlink.ko
 	/sbin/insmod "${MODULES_DIR}/kernel/net/netfilter/ipset/ip_set.ko"
@@ -251,6 +251,5 @@ service_prestart ()
 
 service_posttstop ()
 {
-	unload_ipset
+	# unload_ipset
 }
-
