@@ -34,7 +34,7 @@ DEPENDS  = cross/$(SPK_NAME)
 
 ##SPK_DEPENDS = "crowdsec"
 # OPTIONAL_DEPENDS = "crowdsec"
-START_DEP_SERVICES = "ContainerManager"
+START_DEP_SERVICES = pkg-ContainerManager-dockerd
 
 include ../../mk/spksrc.common.mk
 
