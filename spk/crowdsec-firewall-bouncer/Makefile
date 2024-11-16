@@ -33,7 +33,8 @@ DEPENDS  = cross/$(SPK_NAME)
 #DEPENDS += cross/ipset
 
 ##SPK_DEPENDS = "crowdsec"
-OPTIONAL_DEPENDS = "crowdsec"
+# OPTIONAL_DEPENDS = "crowdsec"
+START_DEP_SERVICES = "ContainerManager"
 
 include ../../mk/spksrc.common.mk
 
